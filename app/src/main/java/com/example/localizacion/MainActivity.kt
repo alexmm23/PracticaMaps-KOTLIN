@@ -7,17 +7,26 @@ import android.widget.Button
 
 class MainActivity : AppCompatActivity() {
     private lateinit var boton: Button
+    private lateinit var botonGoogleApiTrazado: Button
+    private lateinit var botonTrazadoNormal: Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        botonGoogleApiTrazado = findViewById(R.id.btnGoogleApi)
+        botonGoogleApiTrazado.setOnClickListener {
+            val intent = Intent(this, RequestMapsActivity::class.java)
+            intent.putExtra("tipo", "google")
+            startActivity(intent)
+        }
+        botonTrazadoNormal = findViewById(R.id.btnTrazado)
         boton = findViewById(R.id.btnMaps)
-//Evento
         boton.setOnClickListener() { onClick() }
-    }//onCreate
+    }
+
 
     fun onClick() {
         val intent: Intent?
         intent = Intent(this, MapsActivity::class.java)
         startActivity(intent)
-    }//onClick
-}//class
+    }
+}

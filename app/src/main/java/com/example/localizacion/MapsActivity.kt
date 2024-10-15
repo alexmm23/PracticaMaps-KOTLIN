@@ -1,6 +1,7 @@
 package com.example.localizacion
 
 import android.content.pm.PackageManager
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.PolyUtil
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -31,13 +33,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var points: String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapsBinding.inflate(
             layoutInflater
         )
         setContentView(binding.root)
-// Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
@@ -57,6 +59,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                 )
             }
         }
+        points = ""
+        points = intent.getStringExtra("points").toString()
     }
 
     fun onMapCLick(latLng: LatLng?) {
@@ -145,12 +149,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-    }
+        if(points.isNotEmpty()){
+            drawRouteOnMap(mMap, points)
 
+        }
+    }
+    fun drawRouteOnMap(googleMap: GoogleMap, encodedPolyline: String) {
+        val decodedPath = PolyUtil.decode(encodedPolyline)
+        val polylineOptions = PolylineOptions()
+            .addAll(decodedPath)
+            .width(10f)
+            .color(android.graphics.Color.BLUE)
+        googleMap.addPolyline(polylineOptions)
+        if (decodedPath.isNotEmpty()) {
+            val firstPoint = decodedPath[0]
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(firstPoint, 12f))
+        }
+    }
     override fun onMapClick(p0: LatLng) {
         TODO("Not yet implemented")
     }

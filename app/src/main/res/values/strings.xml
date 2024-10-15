@@ -6,4 +6,6 @@
     <string name="hibrida">Hibrida</string>
     <string name="poli">Polilinea</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="trazado_normal">Trazado Normal</string>
+    <string name="trazado_con_google_api">Trazado con Google API</string>
 </resources>
