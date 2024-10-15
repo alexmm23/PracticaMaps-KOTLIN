@@ -33,7 +33,7 @@ class RequestMapsActivity : AppCompatActivity() {
         btnPeticion.setOnClickListener {
             val origen = edtOrigen.text.toString()
             val destino = edtDestino.text.toString()
-            val API_KEY ="AIzaSyAiyCoVwKbUbb4aosASpW25Ir0Cqf5Y0Ds"
+            val API_KEY =""
 
             if(origen.isNotEmpty() && destino.isNotEmpty()){
                 getRoute(origen, destino, API_KEY){response ->
