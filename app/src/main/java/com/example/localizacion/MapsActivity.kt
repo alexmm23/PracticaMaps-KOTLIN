@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.PolyUtil
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +45,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private lateinit var points: String
     private lateinit var tipo: String
     private val origen = LatLng(20.79002579899766, -103.48479598805909)
+    private var currentPolyline: Polyline? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapsBinding.inflate(
@@ -69,6 +71,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                 )
             }
         }
+
         points = intent.getStringExtra("points").toString() ?: ""
         tipo = intent.getStringExtra("tipo").toString() ?: ""
     }
@@ -173,16 +176,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
+        mMap.addMarker(
+            MarkerOptions()
+                .position(origen)
+                .title("Mi Casa")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+        )
         if (points.isNotEmpty() && points != "null") {
             Log.d("POINTS", points)
             drawRouteOnMap(mMap, points)
         }
-        if(tipo.isNotEmpty() && tipo == "normal") {
+        if (tipo.isNotEmpty() && tipo == "normal") {
             showMarkers()
         }
 
     }
+
     @SuppressLint("PotentialBehaviorOverride")
     fun showMarkers() {
         val points = listOf(
@@ -193,22 +202,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             LatLng(20.73150167335765, -103.30723841870196)  // Zoológico Guadalajara
         )
 
-        // Agregar los marcadores al mapa
         for (point in points) {
             val marker = mMap.addMarker(
                 MarkerOptions().position(point)
                     .title("Marcador en ${point.latitude}, ${point.longitude}")
             )
-            marker?.tag = point // Guardar la ubicación en el tag del marcador
+            marker?.tag = point
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origen, 10f))
 
         mMap.setOnMarkerClickListener { marker ->
-            val destino = marker.tag as LatLng // Obtener la ubicación del marcador
+            val destino = marker.tag as LatLng
             val API_KEY = "YOUR_API_KEY"
             val origenString = "${origen.latitude},${origen.longitude}"
             val destinoString = "${destino.latitude},${destino.longitude}"
+            currentPolyline?.remove()
+            currentPolyline = null
             getRoute(origenString, destinoString, API_KEY) { response ->
                 val jsonResponse = JSONObject(response)
                 val routes = jsonResponse.getJSONArray("routes")
@@ -220,6 +230,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             true
         }
     }
+
     fun drawRouteOnMap(googleMap: GoogleMap, encodedPolyline: String) {
         val decodedPath = PolyUtil.decode(encodedPolyline)
         val polylineOptions = PolylineOptions()
@@ -227,6 +238,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             .width(10f)
             .color(android.graphics.Color.BLUE)
         googleMap.addPolyline(polylineOptions)
+        currentPolyline = googleMap.addPolyline(polylineOptions)
         if (decodedPath.isNotEmpty()) {
             val firstPoint = decodedPath[0]
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(firstPoint, 12f))
