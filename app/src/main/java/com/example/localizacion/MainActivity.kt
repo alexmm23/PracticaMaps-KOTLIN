@@ -19,6 +19,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         botonTrazadoNormal = findViewById(R.id.btnTrazado)
+        botonTrazadoNormal.setOnClickListener {
+            val intent = Intent(this, MapsActivity::class.java)
+            intent.putExtra("tipo", "normal")
+            startActivity(intent)
+        }
         boton = findViewById(R.id.btnMaps)
         boton.setOnClickListener() { onClick() }
     }
